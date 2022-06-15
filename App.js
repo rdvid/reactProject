@@ -1,94 +1,108 @@
-import { StatusBar } from 'expo-status-bar';
-import React from 'react';
-import { StyleSheet, Text, Linking, Pressable, View, SafeAreaView, Image } from 'react-native';
-import { Button, TouchableWithoutFeedback } from 'react-native-web';
-import { styleProps } from 'react-native-web/dist/cjs/modules/forwardedProps';
+import React, {useState, useEffect} from "react";
+import { View, StyleSheet, Image, TouchableOpacity } from "react-native";
+import Torch from "react-native-torch";
+import RNShake from 'react-native-shake';
 
-const colorGithub = '#010409';
-const imageProfileGithub = 'https://avatars.githubusercontent.com/u/60834135?v=4';
-const colorFontGithub = '#C9D1D9';
-const colorDarkFontGithub = '#4F565E';
-const urlGithub = 'https://github.com/rdvid';
 
-export default function App() {
+const App = () => {
 
-  const handlePressGoToGithub = async () => {
-    const res = await Linking.canOpenURL(urlGithub);
-    
-    if(res){
-      await Linking.openURL(urlGithub)
-    }
+  const [toggle, setToggle] = useState(false);
   
-  
-  }
+  const handleOnPress = () => setToggle(oldToggle => !oldToggle);
 
-  return (  
-    <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={colorGithub} barStyle='light-content' />
-      <View style={styles.content}>
+  useEffect(() => {
+    // liga flashlight
+    Torch.switchState(toggle);
+  }, [toggle]);
+
+  useEffect(() => {
+    const subscription = RNShake.addListener(() => {
+      handleOnPress()
+    });
+
+    return () => subscription.remove();
+
+  });
+
+
+  return (
+    <View style={toggle ? style.containerLight : style.container}>
+      <TouchableOpacity 
+        onPress={handleOnPress}>
+      
         <Image 
-        source={{uri: imageProfileGithub}} 
-        style={styles.avatar} 
-        accessibilityLabel ='Rafael frente ao espelho com celular'/>
-        <Text accessibilityLabel='Nome: Rafael David da Silva' style={[styles.defaultText, styles.name]}> Rafael David da Silva</Text>
-        <Text accessibilityLabel='Nickname: rdvid' style={[styles.defaultText, styles.nickname]}>rdvid</Text>
-        <Text 
-        acessibilityLabel="Descrição: Front End Web Developer || Javascript || Html || CSS" 
-        style={[styles.defaultText, styles.description]}>Front End Web Developer || Javascript || Html || CSS</Text>   
-      </View>
-      <Pressable onPress={handlePressGoToGithub}>
-        <View style={[styles.button, styles.textButton]}>
-          <Text>Open in Github</Text>
-        </View>
-      </Pressable>
-    </SafeAreaView>
-  );
-}
+          style={
+            toggle 
+              ? style.lightingOn
+              : style.lightingOff
+            }
+          source={
+            toggle 
+              ? require('./icons/eco-light.png')
+              : require('./icons/eco-light-off.png')
+          } 
+        />
 
-const styles = StyleSheet.create({
+        <Image 
+          style={
+            toggle 
+              ? style.logoDioOn
+              : style.logoDioOff
+            }
+          source={
+            toggle 
+              ? require('./icons/logo-dio.png')
+              : require('./icons/logo-dio-white.png')
+          } 
+        />
+
+      </TouchableOpacity>
+    </View>
+
+  )
+
+};
+
+export default App;
+
+const style = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colorGithub,
+    backgroundColor: 'black',
+    alignItems: 'center',
     justifyContent: 'center',
   },
-  content: {
+  containerLight: {
+    flex: 1,
+    backgroundColor: 'white',
     alignItems: 'center',
-    padding: 20,
+    justifyContent: 'center',
   },
-  avatar: {
-    height: 250,
+  lightingOn: {
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    width: 150,
+    height: 150,
+  },
+  lightingOff: {
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    tintColor: 'white',
+    width: 150,
+    height: 150,
+  },
+  logoDioOn: {
+    resizeMode: 'contain',
+    alignSelf: 'center',
     width: 250,
-    borderRadius: 1000,
-    borderColor: 'grey',
-    borderWidth: 2,
+    height: 250,
   },
-  defaultText: {
-    color: colorFontGithub,
-    textAlign: 'center',
+  logoDioOff: {
+    resizeMode: 'contain',
+    alignSelf: 'center',
+    tintColor: 'white',
+    width: 250,
+    height: 250,
   },
-  name: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginTop: 20,
-  },
-  nickname: {
-    fontSize: 18,
-    color: colorDarkFontGithub,
-  },
-  description: {
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  button: {
-    backgroundColor: colorDarkFontGithub,
-    borderRadius: 10,
-    padding: 20,
-    marginTop: 20,
-  },
-  textButton: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  }
-
 
 });
